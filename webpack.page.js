@@ -11,8 +11,12 @@ module.exports = {
   },
   plugins: [
     new webpack.DllReferencePlugin({
-        context: '.',
-        manifest: require('./build/button.manifest.json')
+      context: '.',
+      manifest: require('./build/button.manifest.json')
+    }),
+    new webpack.DllReferencePlugin({
+      context: '.',
+      manifest: require('./build/gallery.manifest.json')
     }),
   ]
 };
