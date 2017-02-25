@@ -1,5 +1,6 @@
 var path = require('path');
 var webpack = require('webpack');
+var glob = require('glob');
 
 module.exports = {
   entry: {
@@ -7,16 +8,12 @@ module.exports = {
   },
   output: {
     filename: '[name].bundle.js',
-    path: path.resolve(__dirname, 'build')
+    path: path.resolve(__dirname, 'build/bundles')
   },
-  plugins: [
-    new webpack.DllReferencePlugin({
+  plugins: glob.sync(path.resolve(__dirname, 'build/manifests/*.json')).map(function(file) {
+    return new webpack.DllReferencePlugin({
       context: '.',
-      manifest: require('./build/button.manifest.json')
-    }),
-    new webpack.DllReferencePlugin({
-      context: '.',
-      manifest: require('./build/gallery.manifest.json')
-    }),
-  ]
+      manifest: require(path.resolve(__dirname, file))
+    });
+  })
 };

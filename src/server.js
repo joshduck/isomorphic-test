@@ -1,30 +1,37 @@
 var express = require('express');
 var Page = require('./components/page');
+var bundles = require('./bundles');
+var html = require('./html');
 var app = express();
 
-app.use(express.static('build'));
+app.use(express.static('build/bundles'));
 
-function printManifestInfo(name) {
-  var manifest = require('../build/' + name + '.manifest.json');
-  console.log('Bundle: ' + name);
-  console.log('Source: /' + name + '.dll.js');
-  console.log('Interface: window.' + manifest.name + '(<module id>)');
-  console.log('Module contents:');
-  Object.keys(manifest.content).forEach(function(src, i) {
-    console.log(' <' + manifest.content[src].id + '> ' + src);
-  });
-  console.log('');
-}
-
-printManifestInfo('button');
-printManifestInfo('gallery');
 
 app.get('/', function (req, res) {
-  res.send('Hello World!' + Page() +
-    '<script type="text/javascript" src="/button.dll.js"></script>' +
-    '<script type="text/javascript" src="/gallery.dll.js"></script>' +
-    '<script type="text/javascript" src="/page.bundle.js"></script>'
-  );
+  var body = ['Hello World!'];
+
+  // Server rendering
+  body.push(Page());
+
+  // Simulate requiring multiple isomorphic components as a side-effect of
+  // server rendering.
+  var bundledModules = [
+    bundles.findBundle(require.resolve('./components/button')),
+    bundles.findBundle(require.resolve('./components/gallery')),
+  ];
+
+  // Render script tags for isomorphic components.
+  body = body.concat(bundledModules.map(function(module) { return html.includeBundle(module.bundle); }));
+
+  // Log the module bodies for button and gallery to console, to show that we
+  // can correctly reach inside the bundle.
+  body = body.concat(bundledModules.map(html.logBundledModule));
+
+  // Simulate a non DLL/component JS, so that we can see it smoothly integrating
+  // with the DLL components.
+  body.push(html.includeBundle('page.bundle.js'));
+
+  res.send(body.join('\n'));
 })
 
 app.listen(3000, function () {

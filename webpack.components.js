@@ -8,12 +8,12 @@ module.exports = {
   },
   output: {
     filename: '[name].dll.js',
-    path: path.resolve(__dirname, 'build'),
+    path: path.resolve(__dirname, 'build/bundles'),
     library: "[name]_[hash]"
   },
   plugins: [
     new webpack.DllPlugin({
-        path: path.join(__dirname, "build", "[name].manifest.json"),
+        path: path.join(__dirname, "build/manifests", "[name].dll.json"),
         name: "[name]_[hash]"
     })
   ]
