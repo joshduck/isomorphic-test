@@ -4,6 +4,21 @@ var app = express();
 
 app.use(express.static('build'));
 
+function printManifestInfo(name) {
+  var manifest = require('../build/' + name + '.manifest.json');
+  console.log('Bundle: ' + name);
+  console.log('Source: /' + name + '.dll.js');
+  console.log('Interface: window.' + manifest.name + '(<module id>)');
+  console.log('Module contents:');
+  Object.keys(manifest.content).forEach(function(src, i) {
+    console.log(' <' + manifest.content[src].id + '> ' + src);
+  });
+  console.log('');
+}
+
+printManifestInfo('button');
+printManifestInfo('gallery');
+
 app.get('/', function (req, res) {
   res.send('Hello World!' + Page() +
     '<script type="text/javascript" src="/button.dll.js"></script>' +
